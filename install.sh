@@ -22,6 +22,7 @@ main() {
     sudo -v
     dependencies
     logo
+    copy_files
     install_repo
     configure
     patch_klipper-backup_update_manager
@@ -40,6 +41,14 @@ dependencies() {
     sleep 1
 }
 
+copy_files() {
+    # Define the project directory
+    PROJECT_DIR="$PWD"
+    echo "Project directory: $PROJECT_DIR"
+    # Copy the project files to the Klipper directory
+    cp -f $HOME/klipper-backup/log-backup.cfg $HOME/printer_data/config/ && echo "log-backup.cfg copied successfully." || echo "Error copying log-backup.cfg."
+    cp -f $HOME/klipper-backup/gcode_shell_command.py $HOME/klipper/klippy/extras/ && echo "gcode_shell_command.py copied successfully." || echo "Error copying gcode_shell_command.py."
+}
 install_repo() {
     questionline=$(getcursor)
     if ask_yn "Do you want to proceed with installation/(re)configuration?"; then
@@ -437,9 +446,9 @@ install_cron() {
             loading_pid=$!
             (
                 crontab -l 2>/dev/null
-                echo "0 */4 * * * $HOME/klipper-backup/script.sh -c \"Cron backup - \$(date +'\\%x - \\%X')\""
+                echo "0 */4 * * * $HOME/klipper-backup/script.sh -c \"Auto Backup - \$(date +'\\%d-\\%m-\\%Y \\%H:\\%M:\\%S')\""
             ) | crontab -
-            sleep .5
+            sleep 1
             kill $loading_pid
             echo -e "\r\033[K${G}●${NC} Installing cron task ${G}Done!${NC}\n"
         else
